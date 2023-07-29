@@ -14,13 +14,13 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
-    res.status(200).send(user);
-  } catch (err) {
-    if (err.name === 'CastError') {
+    if (!user) {
       return res.status(404).send({
         message: 'Пользователь по указанному _id не найден.',
       });
     }
+    res.status(200).send(user);
+  } catch (err) {
     res.status(500).send({
       message: 'Ошибка 500 Internal Server Error',
     });
