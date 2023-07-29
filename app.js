@@ -21,6 +21,4 @@ app.use((req, res, next) => {
 
 app.use(routes);
 
-app.listen(PORT, () => {
-  console.log(`Сервер запущен на ${PORT} порту`);
-});
+app.listen(PORT);

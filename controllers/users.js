@@ -17,13 +17,12 @@ const getUserById = async (req, res) => {
     res.status(200).send(user);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(400).send({
+      return res.status(404).send({
         message: 'Пользователь по указанному _id не найден.',
       });
     }
     res.status(500).send({
       message: 'Ошибка 500 Internal Server Error',
-      err,
     });
   }
   return null;
@@ -37,11 +36,10 @@ const createUser = async (req, res) => {
     if (err.name === 'ValidationError') {
       return res.status(400).send({
         message: 'Переданы некорректные данные при создании пользователя',
-        err,
       });
     }
     res.status(500).send({
-      message: 'Ошибка 500 Internal Server Error', err,
+      message: 'Ошибка 500 Internal Server Error',
     });
   }
   return null;

@@ -35,12 +35,12 @@ const deleteCardById = async (req, res) => {
     res.status(200).send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(404).send({
+      return res.status(400).send({
         message: ' Карточка с указанным _id не найдена.',
       });
     }
     res.status(500).send({
-      message: 'Ошибка 500 Internal Server Error', err,
+      message: 'Ошибка 500 Internal Server Error',
     });
   }
   return null;
@@ -81,7 +81,7 @@ const unlikeCard = async (req, res) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       return res.status(400).send({
-        message: 'Переданы некорректные данные для снятии лайка.'
+        message: 'Переданы некорректные данные для снятии лайка.',
       });
     }
     if (err.name === 'CastError') {
