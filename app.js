@@ -1,6 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const helmet = require('helmet');
 const routes = require('./routes');
+const limiter = require('./middlewares/rate-limiter');
 
 const { PORT = 3000 } = process.env;
 
@@ -19,6 +21,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(limiter);
 app.use(routes);
+app.use(helmet());
 
 app.listen(PORT);

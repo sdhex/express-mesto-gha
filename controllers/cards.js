@@ -1,12 +1,17 @@
 const Card = require('../models/card');
+const {
+  ERROR_BAD_REQUEST,
+  ERROR_NOT_FOUND,
+  ERROR_INTERNAL_SERVER,
+} = require('../utils/constants');
 
 const getAllCards = async (req, res) => {
   try {
     const cards = await Card.find({});
-    res.status(200).send(cards);
+    res.send(cards);
   } catch (err) {
-    res.status(500).send({
-      message: 'Ошибка 500 Internal Server Error', err,
+    res.status(ERROR_INTERNAL_SERVER).send({
+      message: 'Ошибка 500 Internal Server Error',
     });
   }
 };
@@ -14,41 +19,38 @@ const getAllCards = async (req, res) => {
 const createCard = async (req, res) => {
   try {
     const card = await Card.create({ ...req.body, owner: req.user._id });
-    res.status(201).send(card);
+    return res.status(201).send(card);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(400).send({
+      return res.status(ERROR_BAD_REQUEST).send({
         message: 'Переданы некорректные данные при создании карточки',
-        err,
       });
     }
-    res.status(500).send({
-      message: 'Ошибка 500 Internal Server Error', err,
+    return res.status(ERROR_INTERNAL_SERVER).send({
+      message: 'Ошибка 500 Internal Server Error',
     });
   }
-  return null;
 };
 
 const deleteCardById = async (req, res) => {
   try {
     const card = await Card.findByIdAndDelete(req.params.cardId);
     if (!card) {
-      return res.status(404).send({
-        message: ' Карточка с указанным _id не найдена.',
+      return res.status(ERROR_NOT_FOUND).send({
+        message: 'Карточка с указанным _id не найдена.',
       });
     }
-    res.status(200).send(card);
+    return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(400).send({
-        message: ' Карточка с указанным _id не найдена.',
+      return res.status(ERROR_BAD_REQUEST).send({
+        message: 'Переданы некорректные данные для удаления карточки.',
       });
     }
-    res.status(500).send({
+    return res.status(ERROR_INTERNAL_SERVER).send({
       message: 'Ошибка 500 Internal Server Error',
     });
   }
-  return null;
 };
 
 const likeCard = async (req, res) => {
@@ -59,20 +61,21 @@ const likeCard = async (req, res) => {
       { new: true },
     );
     if (!card) {
-      return res.status(404).send({
-        message: ' Передан несуществующий _id карточки.',
+      return res.status(ERROR_NOT_FOUND).send({
+        message: 'Передан несуществующий _id карточки.',
       });
     }
-    res.status(200).send(card);
+    return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(400).send({
+      return res.status(ERROR_BAD_REQUEST).send({
         message: 'Переданы некорректные данные для постановки лайка.',
       });
     }
-    res.status(500).send({ message: 'Ошибка 500 Internal Server Error', err }); // Переделать ошибки
+    return res.status(ERROR_INTERNAL_SERVER).send({
+      message: 'Ошибка 500 Internal Server Error',
+    });
   }
-  return null;
 };
 
 const unlikeCard = async (req, res) => {
@@ -83,20 +86,21 @@ const unlikeCard = async (req, res) => {
       { new: true },
     );
     if (!card) {
-      return res.status(404).send({
-        message: ' Передан несуществующий _id карточки.',
+      return res.status(ERROR_NOT_FOUND).send({
+        message: 'Передан несуществующий _id карточки.',
       });
     }
-    res.status(200).send(card);
+    return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(400).send({
+      return res.status(ERROR_BAD_REQUEST).send({
         message: 'Переданы некорректные данные для снятии лайка.',
       });
     }
-    res.status(500).send({ message: 'Ошибка 500 Internal Server Error', err }); // Переделать ошибки
+    return res.status(ERROR_INTERNAL_SERVER).send({
+      message: 'Ошибка 500 Internal Server Error',
+    });
   }
-  return null;
 };
 
 module.exports = {
