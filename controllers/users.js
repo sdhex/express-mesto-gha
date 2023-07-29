@@ -21,6 +21,11 @@ const getUserById = async (req, res) => {
     }
     res.status(200).send(user);
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).send({
+        message: 'Пользователь по указанному _id не найден.',
+      });
+    }
     res.status(500).send({
       message: 'Ошибка 500 Internal Server Error',
     });
