@@ -37,7 +37,6 @@ const deleteCardById = async (req, res) => {
     if (err.name === 'CastError') {
       return res.status(404).send({
         message: ' Карточка с указанным _id не найдена.',
-        err,
       });
     }
     res.status(500).send({
@@ -59,13 +58,11 @@ const likeCard = async (req, res) => {
     if (err.name === 'ValidationError') {
       return res.status(400).send({
         message: 'Переданы некорректные данные для постановки лайка.',
-        err,
       });
     }
     if (err.name === 'CastError') {
       return res.status(404).send({
         message: 'Пользователь по указанному _id не найден.',
-        err,
       });
     }
     res.status(500).send({ message: 'Ошибка 500 Internal Server Error', err }); // Переделать ошибки
@@ -84,8 +81,7 @@ const unlikeCard = async (req, res) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       return res.status(400).send({
-        message: 'Переданы некорректные данные для снятии лайка.',
-        err,
+        message: 'Переданы некорректные данные для снятии лайка.'
       });
     }
     if (err.name === 'CastError') {

@@ -17,9 +17,8 @@ const getUserById = async (req, res) => {
     res.status(200).send(user);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(404).send({
+      return res.status(400).send({
         message: 'Пользователь по указанному _id не найден.',
-        err,
       });
     }
     res.status(500).send({
@@ -78,7 +77,11 @@ const updateUserInfo = async (req, res) => {
 const updateUserAvatar = async (req, res) => {
   try {
     const { avatar } = req.body;
-    const user = await User.findByIdAndUpdate(req.user._id, { avatar });
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatar },
+      { new: true, runValidators: true },
+    );
     res.status(200).send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
