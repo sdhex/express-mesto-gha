@@ -1,59 +1,52 @@
 const Card = require('../models/card');
 const {
-  ERROR_BAD_REQUEST,
-  ERROR_NOT_FOUND,
-  ERROR_INTERNAL_SERVER,
+  CREATED,
 } = require('../utils/constants');
+const BadRequest = require('../errors/badRequest');
+const NotFound = require('../errors/notFound');
+const Unauthorized = require('../errors/unauthorized');
 
-const getAllCards = async (req, res) => {
+const getAllCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
-    res.send(cards);
+    return res.send(cards);
   } catch (err) {
-    res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
-    });
+    return next(err);
   }
 };
 
-const createCard = async (req, res) => {
+const createCard = async (req, res, next) => {
   try {
     const card = await Card.create({ ...req.body, owner: req.user._id });
-    return res.status(201).send(card);
+    return res.status(CREATED).send(card);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(ERROR_BAD_REQUEST).send({
-        message: 'Переданы некорректные данные при создании карточки',
-      });
+      next(new BadRequest('Переданы некорректные данные при создании карточки'));
     }
-    return res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
-    });
+    return next(err);
   }
 };
 
-const deleteCardById = async (req, res) => {
+const deleteCardById = async (req, res, next) => {
   try {
-    const card = await Card.findByIdAndDelete(req.params.cardId);
+    const card = await Card.findById(req.params.cardId);
     if (!card) {
-      return res.status(ERROR_NOT_FOUND).send({
-        message: 'Карточка с указанным _id не найдена.',
-      });
+      throw new NotFound('Карточка с указанным _id не найдена.');
     }
-    return res.send(card);
+    if (card.owner.toString() !== req.user._id) {
+      next(new Unauthorized('Недостаточно прав для удаления данной карточки'));
+    }
+    await Card.deleteOne(card);
+    return res.status(CREATED).send({ message: 'Карточка удалена' });
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(ERROR_BAD_REQUEST).send({
-        message: 'Переданы некорректные данные для удаления карточки.',
-      });
+      next(new BadRequest('Переданы некорректные данные для удаления карточки.'));
     }
-    return res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
-    });
+    return next(err);
   }
 };
 
-const likeCard = async (req, res) => {
+const likeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -61,24 +54,18 @@ const likeCard = async (req, res) => {
       { new: true },
     );
     if (!card) {
-      return res.status(ERROR_NOT_FOUND).send({
-        message: 'Передан несуществующий _id карточки.',
-      });
+      throw new NotFound('Передан несуществующий _id карточки.');
     }
     return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(ERROR_BAD_REQUEST).send({
-        message: 'Переданы некорректные данные для постановки лайка.',
-      });
+      next(new BadRequest('Переданы некорректные данные для постановки лайка.'));
     }
-    return res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
-    });
+    return next(err);
   }
 };
 
-const unlikeCard = async (req, res) => {
+const unlikeCard = async (req, res, next) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -86,20 +73,14 @@ const unlikeCard = async (req, res) => {
       { new: true },
     );
     if (!card) {
-      return res.status(ERROR_NOT_FOUND).send({
-        message: 'Передан несуществующий _id карточки.',
-      });
+      throw new NotFound('Передан несуществующий _id карточки.');
     }
     return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      return res.status(ERROR_BAD_REQUEST).send({
-        message: 'Переданы некорректные данные для снятии лайка.',
-      });
+      next(new BadRequest('Переданы некорректные данные для снятия лайка.'));
     }
-    return res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
-    });
+    return next(err);
   }
 };
 

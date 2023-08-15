@@ -1,0 +1,48 @@
+const { Joi, celebrate } = require('celebrate');
+
+const regex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-._~:/?#@[\]!$&'()*+,;=]+([/#?].*)?$/;
+
+const validateGetUserById = celebrate({
+  body: Joi.object().keys({
+    userId: Joi.string().length(24).hex().required(),
+  }),
+});
+
+const validateCreateUser = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    about: Joi.string().min(2).max(30).required(),
+    avatar: Joi.string().pattern(regex),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).required(),
+  }),
+});
+
+const validateUpdateUser = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    about: Joi.string().min(2).max(30).required(),
+    avatar: Joi.string().pattern(regex),
+  }),
+});
+
+const validateCreateCard = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required(),
+    link: Joi.string().pattern(regex),
+  }),
+});
+
+const validateGetCardById = celebrate({
+  body: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required(),
+  }),
+});
+
+module.exports = {
+  validateGetUserById,
+  validateCreateUser,
+  validateUpdateUser,
+  validateCreateCard,
+  validateGetCardById,
+};

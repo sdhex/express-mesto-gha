@@ -1,59 +1,66 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
-  ERROR_BAD_REQUEST,
-  ERROR_NOT_FOUND,
-  ERROR_INTERNAL_SERVER,
+  JWT_SECRET,
 } = require('../utils/constants');
+const BadRequest = require('../errors/badRequest');
+const NotFound = require('../errors/notFound');
+const Conflict = require('../errors/conflict');
+const Unauthorized = require('../errors/unauthorized');
 
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     return res.send(users);
   } catch (err) {
-    return res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
-    });
+    return next(err);
   }
 };
 
-const getUserById = async (req, res) => {
+const getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.send(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getUserById = async (req, res, next) => {
   try {
     const user = await User.findById(req.params.userId);
     if (!user) {
-      return res.status(ERROR_NOT_FOUND).send({
-        message: 'Пользователь по указанному _id не найден.',
-      });
+      throw new NotFound('Пользователь по указанному _id не найден.');
     }
     return res.send(user);
   } catch (err) {
-    if (err.name === 'CastError') {
-      return res.status(ERROR_BAD_REQUEST).send({
-        message: 'Пользователь по указанному _id не найден.',
-      });
-    }
-    return res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
-    });
+    return next(err);
   }
 };
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
-    const user = await User.create(req.body);
-    return res.status(201).send(user);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(ERROR_BAD_REQUEST).send({
-        message: 'Переданы некорректные данные при создании пользователя',
-      });
-    }
-    return res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
+    const {
+      name, about, avatar, email, password,
+    } = req.body;
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await User.create({
+      name, about, avatar, email, password: hashedPassword,
     });
+    res.send(user);
+  } catch (err) {
+    if (err.code === 11000) {
+      next(new Conflict('Пользователь с данной почтой уже зарегистрирован'));
+    }
+    if (err.code === 'ValidationError') {
+      next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+    }
+    next(err);
   }
 };
 
-const updateUserInfo = async (req, res) => {
+const updateUserInfo = async (req, res, next) => {
   try {
     const { name, about } = req.body;
     const user = await User.findByIdAndUpdate(
@@ -62,24 +69,18 @@ const updateUserInfo = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      return res.status(ERROR_NOT_FOUND).send({
-        message: 'Пользователь по указанному _id не найден.',
-      });
+      throw new NotFound('Пользователь по указанному _id не найден.');
     }
     return res.send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(ERROR_BAD_REQUEST).send({
-        message: 'Переданы некорректные данные при обновлении профиля.',
-      });
+      next(new BadRequest('Переданы некорректные данные при обновлении пользователя'));
     }
+    return next(err);
   }
-  return res.status(ERROR_INTERNAL_SERVER).send({
-    message: 'Ошибка 500 Internal Server Error',
-  });
 };
 
-const updateUserAvatar = async (req, res) => {
+const updateUserAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
     const user = await User.findByIdAndUpdate(
@@ -88,27 +89,46 @@ const updateUserAvatar = async (req, res) => {
       { new: true, runValidators: true },
     );
     if (!user) {
-      return res.status(ERROR_NOT_FOUND).send({
-        message: 'Пользователь по указанному _id не найден.',
-      });
+      throw new NotFound('Пользователь по указанному _id не найден.');
     }
     return res.send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      return res.status(ERROR_BAD_REQUEST).send({
-        message: 'Переданы некорректные данные при обновлении аватара.',
-      });
+      next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
     }
-    return res.status(ERROR_INTERNAL_SERVER).send({
-      message: 'Ошибка 500 Internal Server Error',
-    });
+    return next(err);
+  }
+};
+
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      throw new Unauthorized('Проверьте правильность ввода почты и пароля');
+    }
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    const result = await bcrypt.compare(password, user.password);
+
+    if (!result) {
+      throw new Unauthorized('Проверьте правильность ввода почты и пароля');
+    }
+
+    res.cookie('jwt', token, {
+      maxAge: 3600000 * 24 * 7,
+      httpOnly: true,
+    }).send({ message: 'All okay' });
+  } catch (err) {
+    next(err);
   }
 };
 
 module.exports = {
   getAllUsers,
+  getCurrentUser,
   getUserById,
   createUser,
   updateUserInfo,
   updateUserAvatar,
+  login,
 };
