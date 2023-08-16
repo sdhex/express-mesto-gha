@@ -53,10 +53,10 @@ const createUser = async (req, res, next) => {
     return res.status(CREATED).send(user);
   } catch (err) {
     if (err.code === 11000) {
-      next(new Conflict('Пользователь с данной почтой уже зарегистрирован'));
+      return next(new Conflict('Пользователь с данной почтой уже зарегистрирован'));
     }
     if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некорректные данные при создании пользователя'));
+      return next(new BadRequest('Переданы некорректные данные при создании пользователя'));
     }
     return next(err);
   }
@@ -76,7 +76,7 @@ const updateUserInfo = async (req, res, next) => {
     return res.send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некорректные данные при обновлении пользователя'));
+      return next(new BadRequest('Переданы некорректные данные при обновлении пользователя'));
     }
     return next(err);
   }
