@@ -57,7 +57,7 @@ const createUser = async (req, res, next) => {
     if (err.name === 'ValidationError') {
       next(new BadRequest('Переданы некорректные данные при создании пользователя'));
     }
-    next(err);
+    return next(err);
   }
 };
 
@@ -94,7 +94,10 @@ const updateUserAvatar = async (req, res, next) => {
     }
     return res.send(user);
   } catch (err) {
-    next(err);
+    if (err.name === 'ValidationError') {
+      next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
+    }
+    return next(err);
   }
 };
 
