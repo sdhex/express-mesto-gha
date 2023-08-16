@@ -11,7 +11,7 @@ const auth = (req, res, next) => {
     throw new Unauthorized('Ошибка токена');
   }
   req.user = payload;
-  next();
+  return next();
 };
 
 module.exports = auth;
