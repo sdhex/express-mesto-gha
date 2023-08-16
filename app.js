@@ -19,6 +19,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 app.use(helmet());
 app.use(limiter);
 
+app.use(routes);
+app.use(errors());
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
@@ -29,7 +31,5 @@ app.use((err, req, res, next) => {
   });
   next();
 });
-app.use(routes);
-app.use(errors());
 
 app.listen(PORT);

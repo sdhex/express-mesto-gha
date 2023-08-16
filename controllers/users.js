@@ -49,7 +49,7 @@ const createUser = async (req, res, next) => {
     const user = await User.create({
       name, about, avatar, email, password: hashedPassword,
     });
-    res.status(CREATED).send(user);
+    return res.status(CREATED).send(user);
   } catch (err) {
     if (err.code === 11000) {
       next(new Conflict('Пользователь с данной почтой уже зарегистрирован'));
