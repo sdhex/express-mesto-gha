@@ -46,10 +46,10 @@ const createUser = async (req, res, next) => {
       name, about, avatar, email, password,
     } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({
+    await User.create({
       name, about, avatar, email, password: hashedPassword,
     });
-    return res.status(CREATED).send(user);
+    return res.status(CREATED).send(name, about, avatar, email);
   } catch (err) {
     if (err.code === 11000) {
       next(new Conflict('Пользователь с данной почтой уже зарегистрирован'));

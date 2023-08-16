@@ -4,7 +4,7 @@ const {
 } = require('../utils/constants');
 const BadRequest = require('../errors/badRequest');
 const NotFound = require('../errors/notFound');
-const Unauthorized = require('../errors/unauthorized');
+const Forbidden = require('../errors/forbidden');
 
 const getAllCards = async (req, res, next) => {
   try {
@@ -34,10 +34,10 @@ const deleteCardById = async (req, res, next) => {
       throw new NotFound('Карточка с указанным _id не найдена.');
     }
     if (card.owner.toString() !== req.user._id) {
-      next(new Unauthorized('Недостаточно прав для удаления данной карточки'));
+      next(new Forbidden('Недостаточно прав для удаления данной карточки'));
     }
     await Card.deleteOne(card);
-    return res.status(CREATED).send({ message: 'Карточка удалена' });
+    return res.send({ message: 'Карточка удалена' });
   } catch (err) {
     if (err.name === 'CastError') {
       next(new BadRequest('Переданы некорректные данные для удаления карточки.'));
