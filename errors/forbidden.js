@@ -4,6 +4,6 @@ class Forbidden extends Error {
     this.name = 'Forbidden';
     this.statusCode = 403;
   }
-};
+}
 
 module.exports = Forbidden;
