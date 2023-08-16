@@ -36,12 +36,12 @@ const validateUpdateUser = celebrate({
 const validateCreateCard = celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30).required(),
-    link: Joi.string().pattern(regex),
+    link: Joi.string().pattern(regex).required(),
   }),
 });
 
 const validateGetCardById = celebrate({
-  body: Joi.object().keys({
+  params: Joi.object().keys({
     cardId: Joi.string().length(24).hex().required(),
   }),
 });

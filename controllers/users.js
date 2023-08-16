@@ -94,10 +94,7 @@ const updateUserAvatar = async (req, res, next) => {
     }
     return res.send(user);
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
-    }
-    return next(err);
+    next(err);
   }
 };
 
