@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const {
   JWT_SECRET,
+  CREATED,
 } = require('../utils/constants');
 const BadRequest = require('../errors/badRequest');
 const NotFound = require('../errors/notFound');
@@ -48,7 +49,7 @@ const createUser = async (req, res, next) => {
     const user = await User.create({
       name, about, avatar, email, password: hashedPassword,
     });
-    res.send(user);
+    res.status(CREATED).send(user);
   } catch (err) {
     if (err.code === 11000) {
       next(new Conflict('Пользователь с данной почтой уже зарегистрирован'));
