@@ -4,9 +4,13 @@ const cardsRoutes = require('./cards');
 const { login, createUser } = require('../controllers/users');
 const auth = require('../middlewares/auth');
 const NotFound = require('../errors/notFound');
+const {
+  validateCreateUser,
+  validateLogin,
+} = require('../utils/validator');
 
-routes.post('/signin', login);
-routes.post('/signup', createUser);
+routes.post('/signin', validateLogin, login);
+routes.post('/signup', validateCreateUser, createUser);
 
 routes.use(auth);
 routes.use('/users', usersRoutes);
