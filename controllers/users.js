@@ -49,6 +49,7 @@ const createUser = async (req, res, next) => {
     const user = await User.create({
       name, about, avatar, email, password: hashedPassword,
     });
+    user.password = undefined;
     return res.status(CREATED).send(user);
   } catch (err) {
     if (err.code === 11000) {
