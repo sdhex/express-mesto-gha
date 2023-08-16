@@ -11,12 +11,13 @@ const {
 const {
   validateGetUserById,
   validateUpdateUser,
+  validateUpdateUserAvatar,
 } = require('../utils/validator');
 
 usersRoutes.get('/', getAllUsers);
 usersRoutes.get('/me', getCurrentUser);
 usersRoutes.get('/:userId', validateGetUserById, getUserById);
 usersRoutes.patch('/me', validateUpdateUser, updateUserInfo);
-usersRoutes.patch('/me/avatar', validateUpdateUser, updateUserAvatar);
+usersRoutes.patch('/me/avatar', validateUpdateUserAvatar, updateUserAvatar);
 
 module.exports = usersRoutes;

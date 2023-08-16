@@ -54,7 +54,7 @@ const createUser = async (req, res, next) => {
     if (err.code === 11000) {
       next(new Conflict('Пользователь с данной почтой уже зарегистрирован'));
     }
-    if (err.code === 'ValidationError') {
+    if (err.name === 'ValidationError') {
       next(new BadRequest('Переданы некорректные данные при создании пользователя'));
     }
     next(err);

@@ -3,7 +3,7 @@ const { Joi, celebrate } = require('celebrate');
 const regex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-._~:/?#@[\]!$&'()*+,;=]+([/#?].*)?$/;
 
 const validateGetUserById = celebrate({
-  body: Joi.object().keys({
+  params: Joi.object().keys({
     userId: Joi.string().length(24).hex().required(),
   }),
 });
@@ -46,6 +46,12 @@ const validateGetCardById = celebrate({
   }),
 });
 
+const validateUpdateUserAvatar = celebrate({
+  body: Joi.object().keys({
+    avatar: Joi.string().pattern(regex).required(),
+  }),
+});
+
 module.exports = {
   validateGetUserById,
   validateLogin,
@@ -53,4 +59,5 @@ module.exports = {
   validateUpdateUser,
   validateCreateCard,
   validateGetCardById,
+  validateUpdateUserAvatar,
 };
