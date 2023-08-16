@@ -11,7 +11,13 @@ const { PORT = 3000 } = process.env;
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
-app.use(errors());
+
+mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
+  useNewUrlParser: true,
+});
+
+app.use(helmet());
+app.use(limiter);
 
 app.use((err, res, req, next) => {
   const { statusCode = 500, message } = err;
@@ -23,13 +29,7 @@ app.use((err, res, req, next) => {
   });
   next();
 });
-
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
-  useNewUrlParser: true,
-});
-
-app.use(helmet());
-app.use(limiter);
 app.use(routes);
+app.use(errors());
 
 app.listen(PORT);
