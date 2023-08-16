@@ -21,7 +21,7 @@ const createCard = async (req, res, next) => {
     return res.status(CREATED).send(card);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некорректные данные при создании карточки'));
+      return next(new BadRequest('Переданы некорректные данные при создании карточки'));
     }
     return next(err);
   }
@@ -34,13 +34,13 @@ const deleteCardById = async (req, res, next) => {
       throw new NotFound('Карточка с указанным _id не найдена.');
     }
     if (card.owner.toString() !== req.user._id) {
-      next(new Forbidden('Недостаточно прав для удаления данной карточки'));
+      return next(new Forbidden('Недостаточно прав для удаления данной карточки'));
     }
     await Card.deleteOne(card);
     return res.send({ message: 'Карточка удалена' });
   } catch (err) {
     if (err.name === 'CastError') {
-      next(new BadRequest('Переданы некорректные данные для удаления карточки.'));
+      return next(new BadRequest('Переданы некорректные данные для удаления карточки.'));
     }
     return next(err);
   }
@@ -59,7 +59,7 @@ const likeCard = async (req, res, next) => {
     return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      next(new BadRequest('Переданы некорректные данные для постановки лайка.'));
+      return next(new BadRequest('Переданы некорректные данные для постановки лайка.'));
     }
     return next(err);
   }
@@ -78,7 +78,7 @@ const unlikeCard = async (req, res, next) => {
     return res.send(card);
   } catch (err) {
     if (err.name === 'CastError') {
-      next(new BadRequest('Переданы некорректные данные для снятия лайка.'));
+      return next(new BadRequest('Переданы некорректные данные для снятия лайка.'));
     }
     return next(err);
   }

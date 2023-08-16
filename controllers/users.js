@@ -22,9 +22,9 @@ const getAllUsers = async (req, res, next) => {
 const getCurrentUser = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
-    res.send(user);
+    return res.send(user);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
@@ -96,7 +96,7 @@ const updateUserAvatar = async (req, res, next) => {
     return res.send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
+      return next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
     }
     return next(err);
   }
@@ -110,18 +110,18 @@ const login = async (req, res, next) => {
       throw new Unauthorized('Проверьте правильность ввода почты и пароля');
     }
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
-    const result = await bcrypt.compare(password, user.password);
+    const isPasswordMatched = await bcrypt.compare(password, user.password);
 
-    if (!result) {
+    if (!isPasswordMatched) {
       throw new Unauthorized('Проверьте правильность ввода почты и пароля');
     }
 
-    res.cookie('jwt', token, {
+    return res.cookie('jwt', token, {
       maxAge: 3600000 * 24 * 7,
       httpOnly: true,
     }).send({ message: 'All okay' });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 };
 
